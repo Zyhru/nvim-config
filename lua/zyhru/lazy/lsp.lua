@@ -11,16 +11,47 @@ return {
         "L3MON4D3/LuaSnip",
         "saadparwaiz1/cmp_luasnip",
         "j-hui/fidget.nvim",
+        "windwp/nvim-autopairs",
+        "github/copilot.vim",
     },
+
+
+
 
     config = function()
         local cmp = require('cmp')
         local cmp_lsp = require("cmp_nvim_lsp")
+        local autopairs = require("nvim-autopairs")
+
+        -- Set up autopairs
+        autopairs.setup({
+          check_ts = true, -- use treesitter if you want smarter pair handling
+        })
+
+        -- Integrate nvim-autopairs with nvim-cmp
+        local cmp_autopairs = require("nvim-autopairs.completion.cmp")
+        cmp.event:on(
+          "confirm_done",
+          cmp_autopairs.on_confirm_done()
+        )
+
         local capabilities = vim.tbl_deep_extend(
             "force",
             {},
             vim.lsp.protocol.make_client_capabilities(),
             cmp_lsp.default_capabilities())
+
+        vim.keymap.set('n', 'gh', vim.lsp.buf.signature_help, opts)
+        vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+        vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
+        vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
+        vim.keymap.set('n', 'go', vim.lsp.buf.type_definition, opts)
+        vim.keymap.set('n', 'gs', vim.lsp.buf.signature_help, opts)
+        vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
+        vim.keymap.set('n', 'gR', vim.lsp.buf.rename, opts)
+        vim.keymap.set({ 'n', 'x' }, 'gf', vim.lsp.buf.format, opts)
+        vim.keymap.set('n', 'ga', vim.lsp.buf.code_action, opts)
+
 
         require("fidget").setup({})
         require("mason").setup()
@@ -28,8 +59,7 @@ return {
             ensure_installed = {
                 "lua_ls",
                 "rust_analyzer",
-            --    "gopls",
-		"clangd"
+		        "clangd"
             },
             handlers = {
                 function(server_name) -- default handler (optional)
